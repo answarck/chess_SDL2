@@ -7,6 +7,7 @@
 #include "boardInit.h"
 #include "types.h"
 
+int turn = 1;
 
 void refreshBoard(SDL_Renderer* renderer, piece* board[8][8]) {
   SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -33,6 +34,8 @@ void refreshBoard(SDL_Renderer* renderer, piece* board[8][8]) {
 
 void movePiece(piece* board[8][8], SDL_Renderer *renderer, vector oldPos, vector newPos) {
   if (board[oldPos.y][oldPos.x] == NULL || board[newPos.y][newPos.x] != NULL)  return;
+  if (board[oldPos.y][oldPos.x]->color == 'w' && turn == -1) return;
+  if (board[oldPos.y][oldPos.x]->color == 'b' && turn == 1) return;
   piece* pieceToMove = board[oldPos.y][oldPos.x];
   board[oldPos.y][oldPos.x] = NULL;
   board[newPos.y][newPos.x] = pieceToMove;
@@ -48,6 +51,8 @@ void movePiece(piece* board[8][8], SDL_Renderer *renderer, vector oldPos, vector
     }
     printf("}\n");
   }
+  printf("%d\n", turn);
+  turn *= -1;
 }
 
 
