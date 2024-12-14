@@ -2,11 +2,8 @@
 #define PIECES_H
 
 #include <SDL2/SDL.h>
+#include "types.h"
 
-typedef struct {
-   int x; 
-   int y;
-} vector;
 typedef struct {
   char name;
   char color;

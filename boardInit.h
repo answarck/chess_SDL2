@@ -10,7 +10,9 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdlib.h>
 #include "pieces.h"
+#include "types.h"
 
 void setColor(SDL_Renderer *renderer, int choice) {
   SDL_Color dark = {0, 71, 171, 255};
@@ -30,43 +32,60 @@ SDL_Texture* loadImage(SDL_Renderer *renderer, char* path) {
   return imageTexture;
 }
 
-void initialisePieces(SDL_Renderer *renderer, piece wPieces[2][8], piece bPieces[2][8]) {
-  char pieceOrder[8] = {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'}, path[16];
-  for (int i = 0; i < 2; i++) {
-    SDL_Rect wPos = {0 , WIN_H - 2 * LENGTH + i * LENGTH, LENGTH, LENGTH};
-    SDL_Rect bPos = {0, LENGTH - i * LENGTH , LENGTH, LENGTH};
-    for (int j = 0; j < 8; j++) {
-      bPieces[i][j].color = 'b';
-      wPieces[i][j].color = 'w';
-      if (i != 1) {
-        bPieces[i][j].name = 'p';
-        wPieces[i][j].name = 'p';
-        bPieces[i][j].image = loadImage(renderer, "./assets/bp.png");
-        wPieces[i][j].image = loadImage(renderer, "./assets/wp.png");
-      }
-      else {
-        snprintf(path, sizeof(path), "./assets/w%c.png", pieceOrder[j]);
-        wPieces[i][j].image = loadImage(renderer, path);
-        snprintf(path, sizeof(path), "./assets/b%c.png", pieceOrder[j]);
-        bPieces[i][j].image = loadImage(renderer, path);
-        bPieces[i][j].name = pieceOrder[j];
-        wPieces[i][j].name = pieceOrder[j];
-        wPieces[i][j].position = (vector ){(wPos.x / 100), (wPos.y / 100)};
-        bPieces[i][j].position = (vector ){(bPos.x / 100), (bPos.y / 100)};
-      }
-      wPieces[i][j].position = (vector ){(wPos.x / 100), (wPos.y / 100)};
-      bPieces[i][j].position = (vector ){(bPos.x / 100), (bPos.y / 100)};
-      SDL_RenderCopy(renderer, wPieces[i][j].image, NULL, &wPos);
-      SDL_RenderCopy(renderer, bPieces[i][j].image, NULL, &bPos);
-      wPos.x += LENGTH;
-      bPos.x += LENGTH;
+void initialisePieces(SDL_Renderer *renderer, piece* board[8][8]) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            board[i][j] = malloc(sizeof(piece));
+        }
     }
-  }
-  SDL_RenderPresent(renderer);
+
+    char pieceOrder[8] = {'r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'}, path[16];
+    SDL_Rect pos = {0, 0, LENGTH, LENGTH};
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (i < 2) {
+                board[i][j]->color = 'b';
+                if (i == 0) {
+                    board[i][j]->name = pieceOrder[j];
+                    snprintf(path, sizeof(path), "./assets/b%c.png", pieceOrder[j]);
+                    board[i][j]->image = loadImage(renderer, path);
+                } 
+                else {
+                    board[i][j]->name = 'p';
+                    board[i][j]->image = loadImage(renderer, "./assets/bp.png");
+                }
+                board[i][j]->position.x = j;
+                board[i][j]->position.y = i;
+                SDL_RenderCopy(renderer, board[i][j]->image, NULL, &pos);
+            } 
+            else if (i > 5) {
+                board[i][j]->color = 'w';
+                if (i == 6) {
+                    board[i][j]->name = 'p';
+                    board[i][j]->image = loadImage(renderer, "./assets/wp.png");
+                } 
+                else {
+                    board[i][j]->name = pieceOrder[j];
+                    snprintf(path, sizeof(path), "./assets/w%c.png", pieceOrder[j]);
+                    board[i][j]->image = loadImage(renderer, path);
+                }
+                board[i][j]->position.x = j;
+                board[i][j]->position.y = i;
+                SDL_RenderCopy(renderer, board[i][j]->image, NULL, &pos);
+            }
+            else {
+              board[i][j] = NULL;
+            }
+            pos.x += LENGTH;
+        }
+        pos.x = 0;
+        pos.y += LENGTH;
+    }
+    SDL_RenderPresent(renderer);
 }
 
-
-void initialiseBoard(SDL_Renderer *renderer, piece wPieces[2][8], piece bPieces[2][8]) {
+void initialiseBoard(SDL_Renderer *renderer, piece* board[8][8]) {
   for (int row = 0; row < 8; row++) {
     for (int col = 0; col < 8; col++) {
       setColor(renderer, (row + col) % 2); 
@@ -75,7 +94,6 @@ void initialiseBoard(SDL_Renderer *renderer, piece wPieces[2][8], piece bPieces[
     }
   }
   SDL_RenderPresent(renderer);  
-  initialisePieces(renderer, wPieces, bPieces);
+  initialisePieces(renderer, board);
 }
 #endif 
-

@@ -2,32 +2,58 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "pieces.h"
 #include "boardInit.h"
-
-char* grid[8][8] = {
-    {"br", "bn", "bb", "bq", "bk", "bb", "bn", "br"},
-    {"bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"},
-    {"e", "e", "e", "e", "e", "e", "e", "e"},
-    {"e", "e", "e", "e", "e", "e", "e", "e"},
-    {"e", "e", "e", "e", "e", "e", "e", "e"},
-    {"e", "e", "e", "e", "e", "e", "e", "e"},
-    {"wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"},
-    {"wr", "wn", "wb", "wq", "wk", "wb", "wn", "wr"},
-};
+#include "types.h"
 
 
-piece bPieces[2][8]; 
-piece wPieces[2][8]; 
-
-vector rowColToPos(vector pos) {
-  vector position;
-  position.x = (pos.y - 1)* LENGTH;
-  position.y = (pos.x - 1) * LENGTH;
-  return position;
+void refreshBoard(SDL_Renderer* renderer, piece* board[8][8]) {
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderClear(renderer);
+  SDL_Rect pos = {0, 0, LENGTH, LENGTH};
+  for (int row = 0; row < 8; row++) {
+    for (int col = 0; col < 8; col++) {
+      setColor(renderer, (row + col) % 2);
+      SDL_Rect square = {col * LENGTH, row * LENGTH, LENGTH, LENGTH};
+      SDL_RenderFillRect(renderer, &square);
+    }
+  }
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (board[i][j] != NULL) {
+        pos.x = j * LENGTH;
+        pos.y = i * LENGTH;
+        SDL_RenderCopy(renderer, board[i][j]->image, NULL, &pos);
+      }
+    }
+  }
+  SDL_RenderPresent(renderer);
 }
 
+void movePiece(piece* board[8][8], SDL_Renderer *renderer, vector oldPos, vector newPos) {
+  if (board[oldPos.y][oldPos.x] == NULL || board[newPos.y][newPos.x] != NULL)  return;
+  piece* pieceToMove = board[oldPos.y][oldPos.x];
+  board[oldPos.y][oldPos.x] = NULL;
+  board[newPos.y][newPos.x] = pieceToMove;
+  pieceToMove->position = newPos;
+  SDL_Rect pos = {newPos.x * LENGTH, newPos.y * LENGTH, LENGTH, LENGTH};
+  refreshBoard(renderer, board);
+  system("clear");
+  for (int i = 0; i < 8; i++) {
+    printf("{ ");
+    for (int j = 0; j < 8; j++) {
+      if (board[i][j] != NULL) printf("%c%c ", board[i][j]->color, board[i][j]->name);
+      else printf("ee ");
+    }
+    printf("}\n");
+  }
+}
+
+
 int main() {
+  piece* board[8][8];
+
   if(SDL_Init(SDL_INIT_VIDEO) != 0) {
     printf("Error: SDL is not initialised! %s\n", SDL_GetError());
     return 1;
@@ -55,14 +81,33 @@ int main() {
     SDL_Quit();
     return 1;
   }
-
-  initialiseBoard(renderer, wPieces, bPieces);
-
+    
+  initialiseBoard(renderer, board);
   SDL_Event event;
-  int running = 1, row, col, check = 0;
-  vector clickedRowCol;
+  int running = 1, check = 0;
+  vector oldPos, newPos;
+  
   while (running) {
     while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_MOUSEBUTTONDOWN) {
+        if (check == 0 && veccmp(newPos, oldPos) != 0) {
+          check = 1;
+          SDL_GetMouseState(&oldPos.x, &oldPos.y);
+          oldPos.x /= LENGTH;
+          oldPos.y /= LENGTH;
+          if (board[oldPos.y][oldPos.x] == NULL) {
+            check = 0;
+            continue;
+          }
+        }
+        else if (check == 1) {
+          check = 0;
+          SDL_GetMouseState(&newPos.x, &newPos.y);
+          newPos.x /= LENGTH;
+          newPos.y /= LENGTH;
+          movePiece(board, renderer, oldPos, newPos);
+        }
+      }
       if (event.type == SDL_QUIT) {
         running = 0;
       }
@@ -75,5 +120,10 @@ int main() {
       }
     }
   }
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      free(board[i][j]);
+    }
+}
   return 0;
 }
