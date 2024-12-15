@@ -2,7 +2,6 @@
 #define PIECES_H
 
 #include <SDL2/SDL.h>
-#include "types.h"
 
 typedef struct {
   char name;

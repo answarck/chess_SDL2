@@ -29,9 +29,43 @@ int searchForObs(piece* board[8][8], vector oldPos, vector newPos) {
       else for (int i = oldPos.x; i < newPos.x; i++) if (board[oldPos.y][i] != NULL) return -1;
     }
   }
+  if (piece_.name == 'b') {
+    int i = oldPos.x, j = oldPos.y;
+    if (oldPos.x > newPos.x) {
+      if (oldPos.y > newPos.y) {
+        while (i > newPos.x && j > newPos.y) {
+          j--;
+          i--;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+      else {
+        while (i > newPos.x && j < newPos.y) {
+          i--;
+          j++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+    }
+    else {
+      if (oldPos.y > newPos.y) {
+        while (i < newPos.x && j > newPos.y) {
+          j--;
+          i++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+      else {
+        while (i < newPos.x && j < newPos.y) {
+          i++;
+          j++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+    }
+  }
   return 0;
 }
-
 int knight(piece* board[8][8], vector oldPos, vector newPos) {
   if (abs(oldPos.x - newPos.x) == 2) {
     if (abs(oldPos.y - newPos.y) == 1) return 0;
@@ -62,16 +96,23 @@ int rook(piece* board[8][8], vector oldPos, vector newPos) {
 }
 int king(piece* board[8][8], vector oldPos, vector newPos) {
   if (abs(oldPos.y - newPos.y) == 1) {
-    //if (abs(oldPos.x - newPos.x) == 1 || oldPos.x == newPos.x) return searchForObs(board, oldPos, newPos);
+    //if (abs(oldPos.x - newPos.x) == 1 || oldPos.x == newPos.x) return searchForObs(board, oldPos, newPos); //add king to king interaction
     if (abs(oldPos.x - newPos.x) == 1 || oldPos.x == newPos.x) return 0;
   }
   else return -1;
 }
+int bishop(piece* board[8][8], vector oldPos, vector newPos) {
+  if (abs(oldPos.x - newPos.x) != abs(newPos.y - oldPos.y)) return -1;
+  else if (oldPos.x == newPos.x || oldPos.y == newPos.y) return -1;
+  else return searchForObs(board, oldPos, newPos);
+}
+
 int isMovable(piece* board[8][8], vector oldPos, vector newPos) {
   char pieceName = board[oldPos.y][oldPos.x]->name;
   if (pieceName == 'p') return pawn(board, oldPos, newPos);
   if (pieceName == 'n') return knight(board, oldPos, newPos);
   if (pieceName == 'r') return rook(board, oldPos, newPos);
   if (pieceName == 'k') return king(board, oldPos, newPos);
+  if (pieceName == 'b') return bishop(board, oldPos, newPos);
 }
 #endif // !RULES_H

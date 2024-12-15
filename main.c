@@ -50,6 +50,7 @@ int main() {
         if (check == 0) {
           check = 1;
           getPos(&oldPos);
+          printf("old-(%d, %d)\n", oldPos.x, oldPos.y);
           if (isSelectable(board, oldPos, &turn) == -1) {
             check = 0;
             continue;
@@ -58,6 +59,7 @@ int main() {
         else if (check == 1) {
           check = 0;
           getPos(&newPos);
+          printf("new-(%d, %d)\n", newPos.x, newPos.y);
           if (isMovable(board, oldPos, newPos) == 0) {
             movePiece(board, renderer, oldPos, newPos, &turn);
           }
