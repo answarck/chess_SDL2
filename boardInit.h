@@ -53,16 +53,16 @@ void initialisePieces(SDL_Renderer *renderer, piece* board[8][8]) {
                 } 
                 else {
                     board[i][j]->name = 'p';
+                    board[i][j]->first = 0;
                     board[i][j]->image = loadImage(renderer, "./assets/bp.png");
                 }
-                board[i][j]->position.x = j;
-                board[i][j]->position.y = i;
                 SDL_RenderCopy(renderer, board[i][j]->image, NULL, &pos);
             } 
             else if (i > 5) {
                 board[i][j]->color = 'w';
                 if (i == 6) {
                     board[i][j]->name = 'p';
+                    board[i][j]->first = 0;
                     board[i][j]->image = loadImage(renderer, "./assets/wp.png");
                 } 
                 else {
@@ -70,13 +70,9 @@ void initialisePieces(SDL_Renderer *renderer, piece* board[8][8]) {
                     snprintf(path, sizeof(path), "./assets/w%c.png", pieceOrder[j]);
                     board[i][j]->image = loadImage(renderer, path);
                 }
-                board[i][j]->position.x = j;
-                board[i][j]->position.y = i;
                 SDL_RenderCopy(renderer, board[i][j]->image, NULL, &pos);
             }
-            else {
-              board[i][j] = NULL;
-            }
+            else board[i][j] = NULL;
             pos.x += LENGTH;
         }
         pos.x = 0;

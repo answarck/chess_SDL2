@@ -7,7 +7,7 @@
 typedef struct {
   char name;
   char color;
-  vector position;
+  int first;
   SDL_Texture* image;
 } piece;
 #endif 
