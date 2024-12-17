@@ -106,7 +106,61 @@ int bishop(piece* board[8][8], vector oldPos, vector newPos) {
   else if (oldPos.x == newPos.x || oldPos.y == newPos.y) return -1;
   else return searchForObs(board, oldPos, newPos);
 }
-
+int queen(piece* board[8][8], vector oldPos, vector newPos) {
+  if (oldPos.x == newPos.x && oldPos.y != newPos.y) {
+    if (newPos.y > oldPos.y) {
+      for (int i = oldPos.y + 1; i < newPos.y; i++) if (board[i][oldPos.x] != NULL) return -1;
+    }
+    else {
+      for (int i = newPos.y + 1; i < oldPos.y; i++) if (board[i][oldPos.x] != NULL) return -1;
+    }
+  }
+  else if (oldPos.x != newPos.x && oldPos.y == newPos.y) {
+    if (newPos.x > oldPos.x) {
+      for (int i = oldPos.x + 1; i < newPos.x; i++) if (board[oldPos.y][i] != NULL) return -1;
+    }
+    else {
+      for (int i = newPos.x + 1; i < oldPos.x; i++) if (board[oldPos.y][i] != NULL) return -1;
+    }
+  }
+  else {
+    if (abs(oldPos.x - newPos.x) != abs(oldPos.y - newPos.y)) return -1;
+    int i = oldPos.x, j = oldPos.y;
+    if (oldPos.x > newPos.x) {
+      if (oldPos.y > newPos.y) {
+        while (i > newPos.x && j > newPos.y) {
+          j--;
+          i--;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+      else {
+        while (i > newPos.x && j < newPos.y) {
+          i--;
+          j++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+    }
+    else {
+      if (oldPos.y > newPos.y) {
+        while (i < newPos.x && j > newPos.y) {
+          j--;
+          i++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+      else {
+        while (i < newPos.x && j < newPos.y) {
+          i++;
+          j++;
+          if (board[j][i] != NULL) return -1;
+        }
+      }
+    }
+  }
+  return 0;
+}
 int isMovable(piece* board[8][8], vector oldPos, vector newPos) {
   char pieceName = board[oldPos.y][oldPos.x]->name;
   if (pieceName == 'p') return pawn(board, oldPos, newPos);
@@ -114,5 +168,6 @@ int isMovable(piece* board[8][8], vector oldPos, vector newPos) {
   if (pieceName == 'r') return rook(board, oldPos, newPos);
   if (pieceName == 'k') return king(board, oldPos, newPos);
   if (pieceName == 'b') return bishop(board, oldPos, newPos);
+  if (pieceName == 'q') return queen(board, oldPos, newPos);
 }
 #endif // !RULES_H
